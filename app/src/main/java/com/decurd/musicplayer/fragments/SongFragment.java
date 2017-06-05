@@ -1,6 +1,13 @@
 package com.decurd.musicplayer.fragments;
 
+import android.content.ContentUris;
+import android.content.Context;
+import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.decurd.musicplayer.R;
+import com.decurd.musicplayer.adapter.CursorRecyclerViewAdapter;
 import com.decurd.musicplayer.model.Song;
 
 import java.util.ArrayList;
@@ -21,6 +29,8 @@ import java.util.List;
 
 public class SongFragment extends Fragment {
 
+    private RecyclerView mRecyclerView;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -31,22 +41,28 @@ public class SongFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         List<Song> data = new ArrayList<>();
 
-        for (int i=0; i < 50; i++) {
-            data.add(new Song("제목" + i, "아티스트" + i ));
+        for (int i = 0; i < 50; i++) {
+            data.add(new Song("제목" + i, "아티스트" + i));
         }
 
-        recyclerView.setAdapter(new SongRecyclerAdapter(data));
+
+        Cursor cursor = getActivity().getContentResolver()
+                .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
+        mRecyclerView.setAdapter(new SongRecyclerAdapter(getActivity(), cursor));
+
+
     }
 
-    public static class SongRecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
+    public static class SongRecyclerAdapter extends CursorRecyclerViewAdapter<ViewHolder> {
 
-        private final List<Song> mData;
+        private Context mContext;
 
-        public SongRecyclerAdapter(List<Song> data) {
-            mData = data;
+        public SongRecyclerAdapter(Context context, Cursor cursor) {
+            super(context, cursor);
+            mContext = context;
         }
 
         @Override
@@ -55,15 +71,25 @@ public class SongFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            Song song = mData.get(position);
-            holder.titleTextView.setText(song.getTitle());
-            holder.artistTextView.setText(song.getArtist());
-        }
+        public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
+            Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID)));
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(mContext, uri);
 
-        @Override
-        public int getItemCount() {
-            return mData.size();
+            // 미디어정보
+            String title = retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_TITLE));
+            String artist = retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_ARTIST));
+            String duration = retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_DURATION));
+
+            // 오디오 앨범 아트
+            /*byte[] albumImage = retriever.getEmbeddedPicture();
+            if (null != albumImage) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(albumImage, 0, albumImage.length);
+            }*/
+
+            viewHolder.titleTextView.setText(title);
+            viewHolder.artistTextView.setText(artist);
         }
     }
 
