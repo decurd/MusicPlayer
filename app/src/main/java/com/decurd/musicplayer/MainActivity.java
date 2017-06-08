@@ -2,6 +2,9 @@ package com.decurd.musicplayer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -15,11 +18,15 @@ import com.decurd.musicplayer.fragments.ListViewFragment;
 import com.decurd.musicplayer.fragments.PlayerFragment;
 import com.decurd.musicplayer.fragments.SongFragment;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     private PlayerFragment mPlayerFragment;
     private ListViewFragment mListViewFragment;
     private SongFragment mSongFrament;
+
+    private MediaPlayer mMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,25 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout.setupWithViewPager(viewPager);
 
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+    }
+
+
+    public void playMusic(Uri uri) {
+        try {
+            mMediaPlayer.setDataSource(this, uri);
+            mMediaPlayer.prepareAsync();
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.start();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private class MusicPlayerPagerAdapter extends FragmentPagerAdapter {
