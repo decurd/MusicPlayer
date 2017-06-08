@@ -18,6 +18,9 @@ import com.decurd.musicplayer.fragments.ListViewFragment;
 import com.decurd.musicplayer.fragments.PlayerFragment;
 import com.decurd.musicplayer.fragments.SongFragment;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,7 +61,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
     public void playMusic(Uri uri) {
         try {
             mMediaPlayer.setDataSource(this, uri);
@@ -73,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     private class MusicPlayerPagerAdapter extends FragmentPagerAdapter {
 

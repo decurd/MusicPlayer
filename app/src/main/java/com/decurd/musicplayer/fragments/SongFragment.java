@@ -20,6 +20,8 @@ import com.decurd.musicplayer.R;
 import com.decurd.musicplayer.adapter.CursorRecyclerViewAdapter;
 import com.decurd.musicplayer.model.Song;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +76,7 @@ public class SongFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
-            Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            final Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID)));
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             retriever.setDataSource(mContext, uri);
@@ -92,6 +94,16 @@ public class SongFragment extends Fragment {
 
             viewHolder.titleTextView.setText(title);
             viewHolder.artistTextView.setText(artist);
+
+            viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    /**
+                     * MainAcitvity#playMusic()
+                     */
+                    EventBus.getDefault().post(uri);
+                }
+            });
         }
     }
 
