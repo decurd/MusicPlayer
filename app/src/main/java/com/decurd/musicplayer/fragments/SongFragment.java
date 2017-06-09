@@ -78,7 +78,7 @@ public class SongFragment extends Fragment {
         public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
             final Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID)));
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             retriever.setDataSource(mContext, uri);
 
             // 미디어정보
@@ -99,9 +99,12 @@ public class SongFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     /**
-                     * MainAcitvity#playMusic()
+                     * {@link com.decurd.musicplayer.MainActivity#playMusic(Uri)}
                      */
                     EventBus.getDefault().post(uri);
+
+                    // 아래 플래그먼트로 정보 쏘기
+                    EventBus.getDefault().post(retriever);
                 }
             });
         }

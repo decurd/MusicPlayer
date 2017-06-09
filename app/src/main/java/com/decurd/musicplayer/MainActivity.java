@@ -89,6 +89,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public boolean isPlaying() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.isPlaying();
+        }
+        return false;
+    }
 
     private class MusicPlayerPagerAdapter extends FragmentPagerAdapter {
 
