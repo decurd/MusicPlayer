@@ -2,6 +2,7 @@ package com.decurd.musicplayer.fragments;
 
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import com.decurd.musicplayer.R;
 import com.decurd.musicplayer.adapter.CursorRecyclerViewAdapter;
 import com.decurd.musicplayer.model.Song;
+import com.decurd.musicplayer.service.MusicService;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -99,11 +101,18 @@ public class SongFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     /**
-                     * {@link com.decurd.musicplayer.MainActivity#playMusic(Uri)}
+                     * {@link com.decurd.musicplayer.service.MusicService#playMusic(Uri)}
                      */
-                    EventBus.getDefault().post(uri);
+                    // EventBus.getDefault().post(uri);
+                    Intent intent = new Intent(mContext, MusicService.class);
+                    intent.setAction(MusicService.ACTION_PLAY);
+                    intent.putExtra("uri", uri);
+                    mContext.startService(intent);
 
-                    // 아래 플래그먼트로 정보 쏘기
+                    /**
+                     * 아래쪽 플래그먼트로 정보 전달하기
+                     * {@link MusicContrallerFragment#updateUI(MediaMetadataRetriever)}
+                     */
                     EventBus.getDefault().post(retriever);
                 }
             });

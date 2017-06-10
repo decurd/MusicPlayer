@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.decurd.musicplayer.MainActivity;
 import com.decurd.musicplayer.R;
 
 import org.greenrobot.eventbus.EventBus;
@@ -22,12 +21,14 @@ import org.greenrobot.eventbus.Subscribe;
  * Created by decur on 2017-05-31.
  */
 
-public class MusicContrallerFragment extends Fragment {
+public class MusicContrallerFragment extends Fragment implements View.OnClickListener {
 
     private ImageView mAlbumImageView;
     private TextView mTitleTextView;
     private TextView mArtistTextView;
     private Button mPlayButton;
+
+
 
     @Nullable
     @Override
@@ -44,10 +45,11 @@ public class MusicContrallerFragment extends Fragment {
         mArtistTextView = (TextView) view.findViewById(R.id.artist_text);
 
         mPlayButton = (Button) view.findViewById(R.id.play_button);
+        mPlayButton.setOnClickListener(this);
     }
 
     @Subscribe
-    public void updateUi(final MediaMetadataRetriever retriever) {
+    public void updateUI(final MediaMetadataRetriever retriever) {
         // 미디어정보
         String title = retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_TITLE));
         String artist = retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_ARTIST));
@@ -62,12 +64,17 @@ public class MusicContrallerFragment extends Fragment {
         mTitleTextView.setText(title);
         mArtistTextView.setText(artist);
 
-        if (((MainActivity)getActivity()).isPlaying()) {
+        /*if (((MainActivity)getActivity()).isPlaying()) {
             mPlayButton.setText("중지");
         } else {
             mPlayButton.setText("재생");
-        }
+        }*/
 
+    }
+
+    @Subscribe
+    public void updatePlayButton(Boolean isPlaying) {
+        mPlayButton.setText(isPlaying? "중지" : "재생");
     }
 
     @Override
@@ -80,5 +87,13 @@ public class MusicContrallerFragment extends Fragment {
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        /**
+         * {@link com.decurd.musicplayer.service.MusicService#clickPlayButton(View)}
+         */
+        EventBus.getDefault().post(v);
     }
 }
